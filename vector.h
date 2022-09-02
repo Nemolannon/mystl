@@ -12,8 +12,8 @@ class vector
     using size_type = std::size_t;
     using pointer = T*;
     using const_pointer = const T*;
-    // iterator?
-    // const_iterator?
+    using iterator = T*;
+    using const_iterator = const T*;
     // reverse_iterator?
     // const_reverce_iterator?
 
@@ -38,8 +38,17 @@ class vector
 
     // Модификация
     void clear();
-    
-
+    iterator insert(const_iterator pos, const T& value);    // Вставляет копию value перед pos
+    iterator insert(const_iterator pos, size_type count, const T& value);   // Вставляет count копий value перед pos
+    iterator insert(const_iterator pos, iterator first, iterator last); // Вставляет перед pos копии элементов исходного контейнера, находящихся в диапазоне [first, last) 
+    iterator erase(const_iterator pos); // Удаляет элемент pos из контейнера
+    iterator erase(iterator first, const_iterator last); // Удаляет из контейнера элементы, находящиеся в диапазоне [first, last)
+    void push_back(const T& value);
+    void pop_back();
+    void resize(size_type new_size);   // Увеличивает/уменьшает размер контейнера до new_size элементов;
+        // если new_size < size(), все элементы с номерами от new_size и больше будут удалены;
+        // если new_size > size(), в конец вектора будет добавлено new_size() - size неинициализированных элементов
+    void resize(sizetype new_size, const_reference value);  // То же самое, но все добавленные(при необходимости) элементы будут инициализированы значением value
 };
 
 };
