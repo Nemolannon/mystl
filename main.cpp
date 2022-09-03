@@ -1,5 +1,6 @@
 #include <vector>
 #include <iostream>
+#include "stash.h"
 using namespace std;
 
 class Obj{
@@ -11,6 +12,7 @@ class Obj{
 
     Obj(int nn) : n(nn)
     {
+        ++counter;
         cout << "Obj " << n << " constructor called" << endl;
     }
 
@@ -28,17 +30,22 @@ class Obj{
     }
 };
 
-int Obj::counter = 0;
+int Obj::counter = -1;
 
 int main()
 {
-    cout << "Create the vector(5)" << endl;
-    vector<Obj> vo(5);
-    cout << "Create the Obj" << endl;
-    Obj obj(100);
-    cout << "Insert Obj at begin()" << endl;
-    vo.insert(vo.begin(), obj);
-    cout << "insert Obj at begin() + 2" << endl;
-    vo.insert(vo.begin(), obj);
-    cout << "Exit the programm" << endl;
+    const int size = 1000;
+    //Obj obj;
+    Stash<Obj> stash;
+    for(int f = 0; f < size; ++f)
+    {
+        cout << "create " << f << " exemplair" << endl;
+        Obj obj;
+        stash.push_back(obj);
+        cout << "exemplair " << f << " has been pushed" << endl;
+    }
+    for(int f = 0; f < size; ++f)
+    {
+        cout << stash[f].n << endl;
+    }
 }
