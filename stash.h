@@ -6,8 +6,6 @@ class Stash
     size_t nSize;
     T* pStash;
 
-    void operator delete(void*) {std::cout << "delete called" << std::endl;};
-    void operator delete[](void*) {std::cout << "delete[] called" << std::endl;}
     public:
     Stash() : nCounter(0), nSize(1), pStash(new T[nSize]) {}
 
@@ -29,7 +27,7 @@ class Stash
         pStash = static_cast<T*>(p);
         for(int f = 0; f < nCounter; ++f)
         {
-            pStash[f] = pOldStash[f];
+            new(&(pStash[f])) T(pOldStash[f]);
         }
         std::cout << "delete the old stash" << std::endl;
         for(int f = 0; f < nCounter; ++f)
@@ -46,7 +44,7 @@ class Stash
         {
             inflate();
         }
-        pStash[nCounter++] = val;
+        new(&(pStash[nCounter++])) T(val);
     }
 
     void pop_back()

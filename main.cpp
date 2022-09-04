@@ -7,25 +7,27 @@ class Obj{
 
     public:
     
-    int n;
     static int counter;
+    int n;
+    int* pN;
 
-    Obj(int nn) : n(nn)
+    Obj(int nn) : n(nn), pN(new int(nn))
     {
         ++counter;
         cout << "Obj " << n << " constructor called" << endl;
     }
 
-    Obj() : n(counter++)
+    Obj() : n(counter++), pN(new int(n))
     {
         cout << "Obj " << n << " constructor called" << endl;
     }
-    Obj(const Obj& obj) : n(obj.n)
+    Obj(const Obj& obj) : n(obj.n), pN(new int(*(obj.pN)))
     {
         cout << "Obj " << n << " copy constructor called" << endl;
     }
     ~Obj()
     {
+        delete pN;
         cout << "Obj " << n << " destructor called" << endl;
     }
 };
@@ -34,7 +36,7 @@ int Obj::counter = -1;
 
 int main()
 {
-    const int size = 1000;
+    const int size = 10000;
     //Obj obj;
     Stash<Obj> stash;
     for(int f = 0; f < size; ++f)
@@ -46,6 +48,6 @@ int main()
     }
     for(int f = 0; f < size; ++f)
     {
-        cout << stash[f].n << endl;
+        cout << *(stash[f].pN) << endl;
     }
 }
