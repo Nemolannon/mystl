@@ -27,4 +27,24 @@ void vector::inflate()
         ::operator delete(pOldStash);   // Освобождаем память, которая была занята только что скопированным контейнером
 }
 
+void vector::push_back(const T& val)
+{
+    if(nCounter == nSize) inflate();
+    new(&(pStash[nCounter++])) T(val);
+}
+
+void vector::pop_back()
+{
+    if(nCounter == 0) return;
+    pStash[--nCounter].~T();
+}
+
+vector::iterator vector::insert(const_iterator pos, const T& val)
+{
+    if(pos == end()) { push_back(val); return back(); }
+    if(nCount == nSize) inflate();
+    iterator temp = back();
+    iterator dest = end();
+}
+
 };
