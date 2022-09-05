@@ -7,7 +7,7 @@ class Stash
     T* pStash;
 
     public:
-    Stash() : nCounter(0), nSize(1), pStash(new T[nSize]) {}
+    Stash() : nCounter(0), nSize(1), pStash(static cast<T*>(::operator new (sizeof(T) * nSize))) {}
 
     ~Stash()
     {
@@ -15,7 +15,7 @@ class Stash
         {
             pStash[f].~T();
         }
-        free(pStash);
+        ::operator delete(pStash);
     }
     void inflate()
     {
@@ -23,8 +23,7 @@ class Stash
         T* pOldStash = pStash;
         nSize *= 2;
         std::cout << "create a new stash" << std::endl;
-        void* p = malloc(nSize * sizeof(T));
-        pStash = static_cast<T*>(p);
+        pStash = static_cast<T*>(::operator new(nSize * sizeof(T)));
         for(int f = 0; f < nCounter; ++f)
         {
             new(&(pStash[f])) T(pOldStash[f]);
@@ -34,7 +33,7 @@ class Stash
         {
             pOldStash[f].~T();
         }
-        free(pOldStash);
+        ::operator delete(pOldStash);
     }
 
     void push_back(const T& val)

@@ -1,17 +1,28 @@
 #pragma once
+
+#ifndef MY_VECTOR_MAX_SIZE
+#define MY_VECTOR_MAX_SIZE 4294967296 // Максимально допустимое количество элементов
+#endif
+#ifndef MY_VECTOR_INIT_SIZE
+#define MY_VECTOR_INIT_SIZE 1   // Количество элементов, под которые будет выделена память при создании вектора
+#endif
+
 namespase my{
 
 template<class T>
 class vector
 {
-    std::size_t nSize;  // Количество элементов контейнера
-    const std::size_t nMaxSize; // Максимально допустимое количество элементов
+    const std::size_t MAX_SIZE; // Максимально допустимое количество элементов
+    const std::size_t TYPE_SIZE;// Размер типа данных, хранящихся в контейнере
 
-    void* pMem; // Указатель на начало области памяти, выделенной под хранение элементов вектора(адрес первой ячейки в этой области)
-    void* pMemBound; // Указатель на начало свободной области памяти(адрес ячейки памяти, следующей за последним байтом последнего хранящегося в контейнере элемента)
-    void* pMemUpperBound;   // Верхняя граница области памяти, выделенной под хранение элементов (адрес последней ячейки в этой области).
-    std::size_t nMemSize;   // Размер области памяти, выделенной для хранения (исчисляется не в байтах, а в элементах).
+    std::size_t nCounter;  // Количество элементов, хранящихся в контейнере
+    std::size_t nSize;   // Размер области памяти, выделенной для хранения (исчисляется не в байтах, а в элементах).
 
+    T* pStash; // Указатель на начало области памяти, выделенной под хранение элементов вектора
+
+    // -------------------------------Рабочие процедуры---------------------
+    void inflate();  // Удваивает количество выделенной памяти; throws std::length_error
+    
     public:
     // -------------------------------Определения типов-----------------
     using value_type = T;
@@ -28,11 +39,14 @@ class vector
     // -----------------------------------Операторы---------------------------
     reference operator[](const size_type);
     vector<value_type>& operator=(const vector<value_type>&);
-    void* operator new(std::size_type);
-    void operator delete(void*);
     // ==,!=, <=, >=... ?
 
     // -------------------------------------Методы------------------------------
+
+    // Конструкторы, деструкторы..
+    vector();
+    vector(const vector&);
+    ~vector();
 
     // Доступ к элементам
     reference at(const size_type);  // throws std::out_of_range
@@ -50,12 +64,12 @@ class vector
     void clear();
     iterator insert(const_iterator pos, const T& value);    // Вставляет копию value перед pos
     iterator insert(const_iterator pos, size_type count, const T& value);   // Вставляет count копий value перед pos
-    iterator insert(const_iterator pos, iterator first, iterator last); // Вставляет перед pos копии элементов исходного контейнера, находящихся в диапазоне [first, last) 
-    iterator erase(const_iterator pos); // Удаляет элемент pos из контейнера
+    iterator insert(const_iterator pos, iterator first, const_iterator last); // Вставляет перед pos копии элементов исходного контейнера, находящихся в диапазоне [first, last) 
+    iterator erase(iterator pos); // Удаляет элемент pos из контейнера
     iterator erase(iterator first, const_iterator last); // Удаляет из контейнера элементы, находящиеся в диапазоне [first, last)
     void push_back(const T& value);
     void pop_back();
-    void resize(size_type new_size);   // Увеличивает/уменьшает размер контейнера до new_size элементов;
+    void resize(size_type new_size);   // Увеличивает/уменьшает размер выделенной памяти контейнера до new_size элементов;
         // если new_size < size(), все элементы с номерами от new_size и больше будут удалены;
         // если new_size > size(), в конец вектора будет добавлено new_size() - size неинициализированных элементов
     void resize(sizetype new_size, const_reference value);  // То же самое, но все добавленные(при необходимости) элементы будут инициализированы значением value
