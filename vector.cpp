@@ -53,7 +53,7 @@ vector::iterator vector::insert(const_iterator pos, const T& val)
     if(pos == end()) { push_back(val); return back(); }
     if(nCount == nSize) inflate();
     iterator temp = back();
-    iterator dest = end();
+    iterator dest = end();//
 }
 
 };
