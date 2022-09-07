@@ -1,7 +1,7 @@
 #include <vector>
 #include <iostream>
-#include "stash.h"
-using namespace std;
+#include "vector.cpp"
+//using namespace std;
 
 class Obj{
 
@@ -14,40 +14,40 @@ class Obj{
     Obj(int nn) : n(nn), pN(new int(nn))
     {
         ++counter;
-        cout << "Obj " << n << " constructor called" << endl;
+        std::cout << "Obj " << n << " constructor called" << std::endl;
     }
 
     Obj() : n(counter++), pN(new int(n))
     {
-        cout << "Obj " << n << " constructor called" << endl;
+        std::cout << "Obj " << n << " constructor called" << std::endl;
     }
     Obj(const Obj& obj) : n(obj.n), pN(new int(*(obj.pN)))
     {
-        cout << "Obj " << n << " copy constructor called" << endl;
+        std::cout << "Obj " << n << " copy constructor called" << std::endl;
     }
     ~Obj()
     {
         delete pN;
-        cout << "Obj " << n << " destructor called" << endl;
+        std::cout << "Obj " << n << " destructor called" << std::endl;
     }
 };
 
-int Obj::counter = -1;
+int Obj::counter = 0;
 
 int main()
 {
-    const int size = 10000;
+    const int size = 1000;
     //Obj obj;
-    Stash<Obj> stash;
+    my::vector<Obj> stash;
     for(int f = 0; f < size; ++f)
     {
-        cout << "create " << f << " exemplair" << endl;
+        std::cout << "create " << f << " exemplair" << std::endl;
         Obj obj;
         stash.push_back(obj);
-        cout << "exemplair " << f << " has been pushed" << endl;
+        std::cout << "exemplair " << f << " has been pushed" << std::endl;
     }
     for(int f = 0; f < size; ++f)
     {
-        cout << *(stash[f].pN) << endl;
+        std::cout << *(stash[f].pN) << std::endl;
     }
 }

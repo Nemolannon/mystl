@@ -20,11 +20,10 @@ int Obj::copy_counter = 0;
 
 int main()
 {
-    Obj obj;
-    Obj* p;
-    {
-        void* temp = ::operator new(sizeof(Obj));
-        p = new(temp) Obj(obj);
-    }
-    std::cout << *(p->pN) << std::endl;
+    Obj obj[10];
+    Obj* pFront = &obj[0];
+    Obj* pBack = &obj[9];
+    Obj* pPos = &obj[5];
+    Obj* pEnd = pBack+1;
+    std::cout << pEnd+(pFront-pPos) << std::endl;
 }

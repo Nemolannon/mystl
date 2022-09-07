@@ -7,7 +7,7 @@ class Stash
     T* pStash;
 
     public:
-    Stash() : nCounter(0), nSize(1), pStash(static cast<T*>(::operator new (sizeof(T) * nSize))) {}
+    Stash() : nCounter(0), nSize(1), pStash(static_cast<T*>(::operator new (sizeof(T) * nSize))) {}
 
     ~Stash()
     {
