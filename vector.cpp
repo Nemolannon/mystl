@@ -11,9 +11,9 @@ vector<T>::vector() : MAX_SIZE(MY_VECTOR_MAX_SIZE), TYPE_SIZE(sizeof(T)),
 template<class T>
 vector<T>::~vector()
 {
-        for(int f = 0; f < nCounter; ++f)
+        for(T *temp(pStash), *bound(end()); temp < bound; ++temp)
         {
-            pStash[f].~T();
+            temp->~T();
         }
         ::operator delete(pStash);
 }
