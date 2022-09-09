@@ -36,9 +36,10 @@ int Obj::counter = 0;
 
 int main()
 {
-    const int size = 1000;
+    const int size = 80;
     //Obj obj;
-    my::vector<Obj> stash;
+    std::vector<Obj> stash;
+    //stash.resize(128);
     for(int f = 0; f < size; ++f)
     {
         std::cout << "create " << f << " exemplair" << std::endl;
@@ -46,6 +47,9 @@ int main()
         stash.push_back(obj);
         std::cout << "exemplair " << f << " has been pushed" << std::endl;
     }
+
+    stash.insert(stash.cbegin() + 31, stash.cbegin() + 60, stash.cbegin() + 65);
+
     for(int f = 0; f < size; ++f)
     {
         std::cout << *(stash[f].pN) << std::endl;

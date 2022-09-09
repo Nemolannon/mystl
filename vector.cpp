@@ -26,7 +26,7 @@ void vector<T>::inflate()
         if(nSize >= MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
         T* pOldStash = pStash;  // Сохраняем указатель
         pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
-        // Типичное решение, которое часто встречается в интернете:
+        // Распространённое в интернете решение:
         // pStash = new T[nSize];
         // кажется ошибочным, во-первых потому что в этом случае для каждого
         // созданного элемента T автоматически будет вызван не нужный(а иногда и недоступный) в данном случае конструктор по умолчанию;
