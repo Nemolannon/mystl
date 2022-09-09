@@ -81,7 +81,7 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, const T& val)
         T* pOldStash = pStash;  // Сохраняем указатель
         pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
         T *receiver(pStash), *source(pOldStash);
-        for( ; source < npos; ++receiver, ++source)
+        for( ; source < pos; ++receiver, ++source)
         {
             new(receiver) T(*source);
             source->~T();
