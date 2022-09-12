@@ -14,6 +14,8 @@ vector<T>::vector(int n) : MAX_SIZE(MY_VECTOR_MAX_SIZE), TYPE_SIZE(sizeof(T)),
 {
     if(nSize > MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
     pStash = static_cast<T*>(::operator new(nSize*TYPE_SIZE));
+    for(T *tmp(pStash); nCounter < n; ++nCounter, ++tmp)
+        new(tmp) T(T());
 }
 
 template<class T>
@@ -149,14 +151,15 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, iterator firs
     }
     else// если место в контейнере ещё есть
     {
-        T *receiver(&back() + chunksize), *source();
-        for(; receiver > pos; --receiver, --source)
+        T *receiver(&back() + chunksize), *source(&back());
+        for(; source >= pos; --receiver, --source)
         {
             new(receiver) T(*source);
             source->~T();
         }
 
-        new(receiver) T(val);
+        for(const T *chunkSlider(last - 1); chunkSlider >= first; --receiver, --chunkSlider)
+            new(receiver) T(*chunkSlider);
         retv = receiver;
     }
     nCounter += chunksize;

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-//#include "vector.cpp"
+#include "vector.cpp"
 
 const int QUANTITY = 100;
 
@@ -23,13 +23,14 @@ int Obj::counter = 0;
 
 int main()
 {
-    std::vector<Obj> vobj(128);
+    my::vector<Obj> vobj(128);
     vobj.push_back(Obj());
+    my::vector<Obj> vvobj(10);
     std::cout << "Out content:" << std::endl;
     for(Obj &obj : vobj)
         std::cout << *(obj.pN) << std::endl;
     std::cout << "Inserting:" << std::endl;
-    vobj.insert(vobj.begin()+100,vobj.begin()+90, vobj.begin()+110);
+    vobj.insert(vobj.begin()+100,vvobj.begin(), vvobj.end());
     std::cout << "Out content:" << std::endl;
     for(Obj &obj : vobj)
         std::cout << obj.n << " " << *(obj.pN) << std::endl;
