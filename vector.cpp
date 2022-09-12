@@ -9,6 +9,14 @@ vector<T>::vector() : MAX_SIZE(MY_VECTOR_MAX_SIZE), TYPE_SIZE(sizeof(T)),
 {}
 
 template<class T>
+vector<T>::vector(int n) : MAX_SIZE(MY_VECTOR_MAX_SIZE), TYPE_SIZE(sizeof(T)),
+    nCounter(0), nSize(n)
+{
+    if(nSize > MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
+    pStash = static_cast<T*>(::operator new(nSize*TYPE_SIZE));
+}
+
+template<class T>
 vector<T>::~vector()
 {
         for(T *temp(pStash), *bound(end()); temp < bound; ++temp)
@@ -61,6 +69,7 @@ void vector<T>::pop_back()
 template<class T>
 typename vector<T>::iterator vector<T>::insert(const_iterator pos, const T& val)
 {
+    T *retv;
     if(nCounter < nSize)// если место в контейнере ещё есть
     {
         T *receiver(end()), *source(&back());
@@ -70,13 +79,14 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, const T& val)
             source->~T();
         }
 
-        new(receiver) T(*pos);
+        new(receiver) T(val);
+        retv = receiver;
     }
     else
     {
          nSize *= 2; // Увеличиваем размер
         // Если превышен лимит, бросаем исключение
-        if(nSize >= MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
+        if(nSize > MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
         // Вопрос: если произошел resize, то итератор pos, как и вообще все сохраненные итераторы, становятся недействительными... Как быть?..
         T* pOldStash = pStash;  // Сохраняем указатель
         pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
@@ -87,9 +97,10 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, const T& val)
             source->~T();
         }
 
+        retv = receiver;
         new(receiver++) T(val);
 
-        for(T *bound(pOldStash + nCounter); source < bound; ++receiver, ++bound)
+        for(T *bound(pOldStash + nCounter); source < bound; ++receiver, ++source)
         {
             new(receiver) T(*source);
             source->~T();
@@ -98,6 +109,58 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, const T& val)
         ::operator delete(pOldStash);   // Освобождаем память, которая была занята только что скопированным контейнером
     }
     ++nCounter;
+    return retv;
+}
+
+template<class T>
+typename vector<T>::iterator vector<T>::insert(const_iterator pos, iterator first, const_iterator last)
+{
+    T *retv;
+    size_t chunksize = last - first;
+    size_t needspace = nCounter + chunksize;
+    if(nSize < needspace)
+    {
+        while(nSize < needspace) nSize*= 2; // Увеличиваем размер
+        // Если превышен лимит, бросаем исключение
+        if(nSize > MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
+        // Вопрос: если произошел resize, то итератор pos, как и вообще все сохраненные итераторы, становятся недействительными... Как быть?..
+        T* pOldStash = pStash;  // Сохраняем указатель
+        pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
+        T *newStashSlider(pStash), *oldStashSlider(pOldStash);
+        for( ; oldStashSlider < pos; ++newStashSlider, ++oldStashSlider)
+        {
+            new(newStashSlider) T(*oldStashSlider);
+        }
+
+        retv = newStashSlider;
+        for(T *source(first); source < last; ++source, ++newStashSlider)
+        new(newStashSlider) T(*source);
+
+        for(T *bound(pOldStash + nCounter); oldStashSlider < bound; ++newStashSlider, ++oldStashSlider)
+        {
+            new(newStashSlider) T(*oldStashSlider);
+        }
+
+        for(T *bound(pOldStash + nCounter), *tmp = pOldStash; tmp < bound; ++tmp)
+        {
+            tmp->~T();
+        }
+        ::operator delete(pOldStash);   // Освобождаем память, которая была занята только что скопированным контейнером
+    }
+    else// если место в контейнере ещё есть
+    {
+        T *receiver(&back() + chunksize), *source();
+        for(; receiver > pos; --receiver, --source)
+        {
+            new(receiver) T(*source);
+            source->~T();
+        }
+
+        new(receiver) T(val);
+        retv = receiver;
+    }
+    nCounter += chunksize;
+    return retv;
 }
 
 template<class T>
