@@ -77,12 +77,20 @@ int main()
         std::cout << msg.what() << std::endl;
     }
 
-    std::cout << "insert 10 Obj to begin() + 10 in vstash[0]:" << std::endl;
+    //std::cout << "insert 10 Obj to begin() + 10 in vstash[0]:" << std::endl;
 
-    vstash[0].insert(vstash[0].begin()+10, Obj(), 10);
+    //vstash[0].insert(vstash[0].begin()+10, 10, Obj());
 
     std::cout << "vstash[0]:" << std::endl;
+    for(int i = 0; i < vstash[0].size(); ++i)
+    {
+        std::cout << vstash[0][i].n << " " << *(vstash[0][i].pN) << std::endl;
+    }
 
+    std::cout << "vstash[0].erase(vstash[0].begin()+10, vstash[0].begin+20)" << std::endl;
+    vstash[0].erase(vstash[0].begin()+10, vstash[0].begin()+20);
+
+    std::cout << "vstash[0]:" << std::endl;
     for(int i = 0; i < vstash[0].size(); ++i)
     {
         std::cout << vstash[0][i].n << " " << *(vstash[0][i].pN) << std::endl;

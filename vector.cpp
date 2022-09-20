@@ -1,7 +1,10 @@
 #include "vector.h"
+
 namespace my
 {
 
+
+//----------------------------------------------Конструкторы----------------------------------------------
 template<class T>
 vector<T>::vector() : MAX_SIZE(MY_VECTOR_MAX_SIZE), TYPE_SIZE(sizeof(T)),
     nCounter(0), nSize(MY_VECTOR_INIT_SIZE),
@@ -38,25 +41,42 @@ vector<T>::~vector()
         ::operator delete(pStash);
 }
 
-template<class T>
-void vector<T>::inflate()
-{
-        nSize *= 2; }
 
+//------------------------------------Доступ к элементам----------------------------------
+
+//at()
 template<class T>
-void vector<T>::push_back(const T& val)
+typename vector<T>::reference vector<T>::at(const size_t n)
 {
-    if(nCounter == nSize) reserve(nSize);
-    new(&(pStash[nCounter++])) T(val);
+    if(n < nSize) return pStash[n];
+    throw std::out_of_range("Out of range in my::vector::at(), nSize = " + std::to_string(nSize) + "; n = " + std::to_string(n));
 }
 
+//operator[]
 template<class T>
-void vector<T>::pop_back()
+typename vector<T>::reference vector<T>::operator[](size_type n)
 {
-    if(nCounter == 0) return;
-    pStash[--nCounter].~T();
+    return pStash[n];
 }
 
+
+//---------------------------------------Модификация------------------------
+
+//clear()
+template<class T>
+void vector<T>::clear()
+{
+    for(T *temp(pStash), *bound(end()); temp < bound; ++temp)
+    {
+        temp->~T();
+    }
+    ::operator delete(pStash);
+    nCounter = 0;
+    nSize = MY_VECTOR_INIT_SIZE;
+    pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));
+}
+
+//insert(pos, value, count)
 /* Метод insert(), как и в стандартном векторе, выполняет побитовое копирование тех элементов,
  которые требуется переместить внутри вектора, поэтому для успешного выполнения insert
  все элементы вектора должны быть РЕЛОЦИРУЕМЫ, то есть для вектора объектов типа
@@ -84,7 +104,6 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, const T& val,
         for(; source >= pos; --receiver, --source)
         {
             *receiver = *source;  // Как и в стандартном векторе, все существующие в контейнере объекты перемещаются побитовым копированием, без вызова копирующего конструктора
-            //source->~T();
         }
 
         for(size_t i(count); i; --i) new(receiver--) T(val);
@@ -95,7 +114,6 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, const T& val,
         while(nCounter < nSize - count) nSize *= 2; // Увеличиваем размер
         // Если превышен лимит, бросаем исключение
         if(nSize > MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
-        // Вопрос: если произошел resize, то итератор pos, как и вообще все сохраненные итераторы, становятся недействительными... Как быть?..
         T* pOldStash = pStash;  // Сохраняем указатель
         pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
         T *receiver(pStash), *source(pOldStash);
@@ -114,6 +132,7 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, const T& val,
             new(receiver) T(*source);
             source->~T();
         }
+        // Замечание: теперь итератор pos, как и вообще все сохраненные итераторы, становятся недействительными
 
         ::operator delete(pOldStash);   // Освобождаем память, которая была занята только что скопированным контейнером
     }
@@ -121,6 +140,7 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, const T& val,
     return retv;
 }
 
+//insert(pos, first, last)
 template<class T>
 typename vector<T>::iterator vector<T>::insert(const_iterator pos, iterator first, const_iterator last)
 {
@@ -132,7 +152,6 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, iterator firs
         while(nSize < needspace) nSize*= 2; // Увеличиваем размер
         // Если превышен лимит, бросаем исключение
         if(nSize > MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
-        // Вопрос: если произошел resize, то итератор pos, как и вообще все сохраненные итераторы, становятся недействительными... Как быть?..
         T* pOldStash = pStash;  // Сохраняем указатель
         pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
         T *newStashSlider(pStash), *oldStashSlider(pOldStash);
@@ -162,7 +181,6 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, iterator firs
         for(; source >= pos; --receiver, --source)
         {
             *receiver = *source;
-            //source->~T();
         }
 
         for(const T *chunkSlider(last - 1); chunkSlider >= first; --receiver, --chunkSlider)
@@ -173,32 +191,49 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, iterator firs
     return retv;
 }
 
+//erase(first, last)
 template<class T>
-typename vector<T>::reference vector<T>::at(const size_t n)
+typename vector<T>::iterator vector<T>::erase(iterator first, const_iterator last)
 {
-    if(n < nSize) return pStash[n];
-    throw std::out_of_range("Out of range in my::vector::at(), nSize = " + std::to_string(nSize) + "; n = " + std::to_string(n));
-}
-
-template<class T>
-typename vector<T>::reference vector<T>::operator[](size_type n)
-{
-    return pStash[n];
-}
-
-template<class T>
-void vector<T>::clear()
-{
-    for(T *temp(pStash), *bound(end()); temp < bound; ++temp)
+    for(T *tmp(first); tmp < last; ++tmp)
     {
-        temp->~T();
+        tmp->~T();
     }
-    ::operator delete(pStash);
-    nCounter = 0;
-    nSize = MY_VECTOR_INIT_SIZE;
-    pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));
+    for(T *recv(first), *source(const_cast<T*>(last)), *bound(end()); source < bound; ++recv, ++source)
+    {
+        *recv = *source;
+    }
+    nCounter -= last-first;
+    return nullptr;
 }
 
+//erase(pos)
+template<class T>
+typename vector<T>::iterator vector<T>::erase(iterator pos)
+{
+    return erase(pos, pos+1);
+}
+
+//push_back()
+template<class T>
+void vector<T>::push_back(const T& val)
+{
+    if(nCounter == nSize) reserve(nSize);
+    new(&(pStash[nCounter++])) T(val);
+}
+
+//pop_back()
+template<class T>
+void vector<T>::pop_back()
+{
+    if(nCounter == 0) return;
+    pStash[--nCounter].~T();
+}
+
+
+//------------------------------------Объем, размер, вместимость------------------------
+
+//reserve()
 template<class T>
 void vector<T>::reserve(size_t n)
 {
@@ -211,11 +246,8 @@ void vector<T>::reserve(size_t n)
     // pStash = new T[nSize];
     // кажется ошибочным, во-первых потому что в этом случае для каждого
     // созданного элемента T автоматически будет вызван не нужный(а иногда и недоступный) в данном случае конструктор по умолчанию;
-    // во-вторых, копирование элементов в этот уже инициализированный массив будет возможно только побитово, например с помощью оператора "=":
-    // pStash[i] = pOldStash[i];
-    // соответственно, необходимый вызов копирующего конструктора для каждого копируемого элемента становится недоступным
-    // Поэтому единственно верным решением кажется выделение из кучи неотформатированной области нужного размера,
-    // её принудительное форматирование(static_cast<>) и последующее размещение в эой облати
+    // более верным кажется выделение из кучи неотформатированной области нужного размера,
+    // её принудительное "форматирование"(static_cast<>) и последующее размещение в эой облати
     // копий существующих объектов при помощи оператора placement new.
     for(T *receiver(pStash), *source(pOldStash), *bound(pOldStash + nCounter); source < bound; ++receiver, ++source)
     {
