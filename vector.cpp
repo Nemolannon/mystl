@@ -218,7 +218,7 @@ typename vector<T>::iterator vector<T>::erase(iterator pos)
 template<class T>
 void vector<T>::push_back(const T& val)
 {
-    if(nCounter == nSize) reserve(nSize);
+    if(nCounter == nSize) reserve(nSize*2);
     new(&(pStash[nCounter++])) T(val);
 }
 
@@ -237,9 +237,10 @@ void vector<T>::pop_back()
 template<class T>
 void vector<T>::reserve(size_t n)
 {
-    nSize += n;// Увеличиваем размер
+    nSize = n; // Пробуем изменить размер
     // Если нарушен лимит, бросаем исключение
     if(nSize >= MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
+    size_t copyes = (n > nCounter) ? nCounter : n;  // Вычисляем, сколько элементов нужно перенести в новый контейнер
     T* pOldStash = pStash;  // Сохраняем указатель
     pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
     // Распространённое в интернете решение:
@@ -249,11 +250,18 @@ void vector<T>::reserve(size_t n)
     // более верным кажется выделение из кучи неотформатированной области нужного размера,
     // её принудительное "форматирование"(static_cast<>) и последующее размещение в эой облати
     // копий существующих объектов при помощи оператора placement new.
-    for(T *receiver(pStash), *source(pOldStash), *bound(pOldStash + nCounter); source < bound; ++receiver, ++source)
+    for(T *receiver(pStash), *source(pOldStash), *bound(pOldStash + copyes); source < bound; ++receiver, ++source)
     {
         new(receiver) T(*source);
         source->~T();  // В данном случае также необходим принудительный вызов деструктора для каждого элемента, что тоже выглядит не очень изящно, но другого способа я не нашел
     }
+
+    // Если нужно, удаляем остатки
+    for(T *tmp(pOldStash + copyes), *bound(pOldStash + nCounter); tmp < bound; ++tmp)
+    {
+        source->~T();
+    }
+    
     ::operator delete(pOldStash);   // Освобождаем память, которая была занята только что скопированным контейнером
 }
 

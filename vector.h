@@ -69,8 +69,8 @@ class vector
     bool empty() const{ return nCounter == 0; }
     size_type size() const { return nCounter; } // Количество элементов, которые хранятся в vector в данный момент
     size_type max_size() const { return MAX_SIZE; } // Максимально допустимое количество элементов
-    void reserve(size_type n); // Выделяет дополнительно память для n элементов(увеличивает capacity на n); throws std::length_error
-    size_type capacity() const { return nSize - nCounter; } // Количество элементов, которые можно поместить в vector без дополнительного выделения памяти
+    void reserve(size_type n); // Меняет объем памяти, выделенной под хранение; объем становится равным n, все что окажется за пределами - удаляется. throws std::length_error
+    size_type capacity() const { return nSize; } // Объем памяти(в элементах), выделенной под хранение элементов
 
     // Модификация
     void clear();
