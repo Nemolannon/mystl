@@ -100,14 +100,14 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, const T& val,
     T *retv;
     if(nCounter < nSize - count)// если место в контейнере ещё есть
     {
-        T *receiver(&back()+count), *source(&back());
-        for(; source >= pos; --receiver, --source)
+        T *target(&back()+count), *source(&back());
+        for(; source >= pos; --target, --source)
         {
-            *receiver = *source;  // Как и в стандартном векторе, все существующие в контейнере объекты перемещаются побитовым копированием, без вызова копирующего конструктора
+            *target = *source;  // Как и в стандартном векторе, все существующие в контейнере объекты перемещаются побитовым копированием, без вызова копирующего конструктора
         }
 
-        for(size_t i(count); i; --i) new(receiver--) T(val);
-        retv = receiver;
+        for(size_t i(count); i; --i) new(target--) T(val);
+        retv = target;
     }
     else
     {
@@ -116,20 +116,20 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, const T& val,
         if(nSize > MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
         T* pOldStash = pStash;  // Сохраняем указатель
         pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
-        T *receiver(pStash), *source(pOldStash);
-        for( ; source < pos; ++receiver, ++source)
+        T *target(pStash), *source(pOldStash);
+        for( ; source < pos; ++target, ++source)
         {
-            new(receiver) T(*source);
+            new(target) T(*source);
             source->~T();
         }
 
-        retv = receiver;
+        retv = target;
         
-        for(size_t i(count); i; --i) new(receiver++) T(val);
+        for(size_t i(count); i; --i) new(target++) T(val);
 
-        for(T *bound(pOldStash + nCounter); source < bound; ++receiver, ++source)
+        for(T *bound(pOldStash + nCounter); source < bound; ++target, ++source)
         {
-            new(receiver) T(*source);
+            new(target) T(*source);
             source->~T();
         }
         // Замечание: теперь итератор pos, как и вообще все сохраненные итераторы, становятся недействительными
@@ -177,15 +177,15 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, iterator firs
     }
     else// если место в контейнере ещё есть
     {
-        T *receiver(&back() + chunksize), *source(&back());
-        for(; source >= pos; --receiver, --source)
+        T *target(&back() + chunksize), *source(&back());
+        for(; source >= pos; --target, --source)
         {
-            *receiver = *source;
+            *target = *source;
         }
 
-        for(const T *chunkSlider(last - 1); chunkSlider >= first; --receiver, --chunkSlider)
-            new(receiver) T(*chunkSlider);
-        retv = receiver;
+        for(const T *chunkSlider(last - 1); chunkSlider >= first; --target, --chunkSlider)
+            new(target) T(*chunkSlider);
+        retv = target;
     }
     nCounter += chunksize;
     return retv;
@@ -250,16 +250,16 @@ void vector<T>::reserve(size_t n)
     // более верным кажется выделение из кучи неотформатированной области нужного размера,
     // её принудительное "форматирование"(static_cast<>) и последующее размещение в эой облати
     // копий существующих объектов при помощи оператора placement new.
-    for(T *receiver(pStash), *source(pOldStash), *bound(pOldStash + copyes); source < bound; ++receiver, ++source)
+    for(T *target(pStash), *source(pOldStash), *bound(pOldStash + copyes); source < bound; ++target, ++source)
     {
-        new(receiver) T(*source);
+        new(target) T(*source);
         source->~T();  // В данном случае также необходим принудительный вызов деструктора для каждого элемента, что тоже выглядит не очень изящно, но другого способа я не нашел
     }
 
     // Если нужно, удаляем остатки
     for(T *tmp(pOldStash + copyes), *bound(pOldStash + nCounter); tmp < bound; ++tmp)
     {
-        source->~T();
+        tmp->~T();
     }
     
     ::operator delete(pOldStash);   // Освобождаем память, которая была занята только что скопированным контейнером
