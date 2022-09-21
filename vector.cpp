@@ -239,13 +239,13 @@ void vector<T>::reserve(size_t n)
 {
     nSize = n; // Пробуем изменить размер
     // Если нарушен лимит, бросаем исключение
-    if(nSize >= MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
+    if(nSize > MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
     size_t copyes = (n > nCounter) ? nCounter : n;  // Вычисляем, сколько элементов нужно перенести в новый контейнер
     T* pOldStash = pStash;  // Сохраняем указатель
     pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
     // Распространённое в интернете решение:
     // pStash = new T[nSize];
-    // кажется ошибочным, во-первых потому что в этом случае для каждого
+    // кажется ошибочным, так как в этом случае для каждого
     // созданного элемента T автоматически будет вызван не нужный(а иногда и недоступный) в данном случае конструктор по умолчанию;
     // более верным кажется выделение из кучи неотформатированной области нужного размера,
     // её принудительное "форматирование"(static_cast<>) и последующее размещение в эой облати
@@ -265,4 +265,12 @@ void vector<T>::reserve(size_t n)
     ::operator delete(pOldStash);   // Освобождаем память, которая была занята только что скопированным контейнером
 }
 
+// resize(new_size)
+template<class T>
+void vector::resize(size_t new_size)
+{
+    size_t old_size = nSize;
+    reserve(new_size);
+    for()
+}
 };
