@@ -70,7 +70,8 @@ class vector
 
     // Модификация
     void clear();
-    iterator insert(const_iterator pos, const T& value, size_t = 1);   // Вставляет count(=1) копий value перед pos
+    iterator insert(const_iterator pos, const_reference val);   // Вставляет val перед pos
+    iterator insert(const_iterator pos, size_type count, const_reference value);   // Вставляет count копий value перед pos
     iterator insert(const_iterator pos, iterator first, const_iterator last); // Вставляет перед pos копии элементов исходного контейнера, находящихся в диапазоне [first, last) 
     iterator erase(iterator pos); // Удаляет элемент pos из контейнера
     iterator erase(iterator first, const_iterator last); // Удаляет из контейнера элементы, находящиеся в диапазоне [first, last)

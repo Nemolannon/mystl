@@ -30,7 +30,7 @@ int main()
     for(Obj &obj : vobj)
         std::cout << *(obj.pN) << std::endl;
     std::cout << "Inserting:" << std::endl;
-    vobj.insert(vobj.begin()+100,vvobj.begin(), vvobj.end());
+    vobj.insert(vobj.begin()+100,Obj());
     std::cout << "Out content:" << std::endl;
     for(Obj &obj : vobj)
         std::cout << obj.n << " " << *(obj.pN) << std::endl;

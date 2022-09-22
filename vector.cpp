@@ -94,9 +94,57 @@ void vector<T>::clear()
  дополнительно выделить память. В этом случае для всех перемещаемых объектов будут вызваны
  копирующие конструкторы
 */
+
 template<class T>
-typename vector<T>::iterator vector<T>::insert(const_iterator pos, const T& val, size_t count)
+typename vector<T>::iterator vector<T>::insert(const_iterator pos, const_reference val)
 {
+    T *retv;
+    if(nCounter < nSize)// если место в контейнере ещё есть
+    {
+        T *target(end()), *source(&back());
+        for(; source >= pos; --target, --source)
+        {
+            *target = *source;  // Как и в стандартном векторе, все существующие в контейнере объекты перемещаются побитовым копированием, без вызова копирующего конструктора
+        }
+
+        new(target) T(val);
+        retv = target;
+    }
+    else
+    {
+        nSize *= 2; // Увеличиваем размер
+        // Если превышен лимит, бросаем исключение
+        if(nSize > MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
+        T* pOldStash = pStash;  // Сохраняем указатель
+        pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
+        T *target(pStash), *source(pOldStash);
+        for( ; source < pos; ++target, ++source)
+        {
+            new(target) T(*source);
+            source->~T();
+        }
+
+        retv = target;
+        
+        new(target++) T(val);
+
+        for(T *bound(pOldStash + nCounter); source < bound; ++target, ++source)
+        {
+            new(target) T(*source);
+            source->~T();
+        }
+        // Замечание: теперь итератор pos, как и вообще все сохраненные итераторы, становятся недействительными
+
+        ::operator delete(pOldStash);   // Освобождаем память, которая была занята только что скопированным контейнером
+    }
+    ++nCounter;
+    return retv;
+}
+
+template<class T>
+typename vector<T>::iterator vector<T>::insert(const_iterator pos, size_type count, const_reference val)
+{
+    if(count == 0) return end();
     T *retv;
     if(nCounter < nSize - count)// если место в контейнере ещё есть
     {
@@ -267,10 +315,24 @@ void vector<T>::reserve(size_t n)
 
 // resize(new_size)
 template<class T>
-void vector::resize(size_t new_size)
+void vector<T>::resize(size_type new_size)
 {
-    size_t old_size = nSize;
     reserve(new_size);
-    for()
+    for(T *tmp(pStash + nCounter), *bound(pStash + nSize); tmp < bound; ++tmp, ++nCounter)
+    {
+        new(tmp) T();
+    }
 }
+
+//resize(new_size, val)
+template<class T>
+void vector<T>::resize(size_type new_size, const_reference val)
+{
+    reserve(new_size);
+    for(T *tmp(pStash + nCounter), *bound(pStash + nSize); tmp < bound; ++tmp, ++nCounter)
+    {
+        new(tmp) T(val);
+    }
+}
+
 };
