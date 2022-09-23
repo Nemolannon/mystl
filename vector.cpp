@@ -25,9 +25,9 @@ template<class T>
 vector<T>::vector(const vector<T> &vec) : MAX_SIZE(vec.MAX_SIZE), TYPE_SIZE(vec.TYPE_SIZE), nSize(vec.nSize), nCounter(vec.nCounter),
 pStash(static_cast<T*>(::operator new(nSize*TYPE_SIZE)))
 {
-    for(T *rec(pStash), *source(vec.pStash), *bound(const_cast<T*>(vec.cend())); source < bound; ++rec, ++source)
+    for(T *targ(pStash), *source(vec.pStash), *bound(const_cast<T*>(vec.cend())); source < bound; ++targ, ++source)
     {
-        new(rec) T(*source);
+        new(targ) T(*source);
     }
 }
 
@@ -193,9 +193,9 @@ template<class T>
 typename vector<T>::iterator vector<T>::insert(const_iterator pos, iterator first, const_iterator last)
 {
     T *retv;
-    size_t chunksize(last - first);
-    size_t needspace(nCounter + chunksize);
-    if(nSize < needspace)
+    size_t chunksize(last - first); // Сколько элементов копировать
+    size_t needspace(nCounter + chunksize); // Сколько нужно будет памяти для вектора после вставки
+    if(nSize < needspace)   // Если выделено меньше, чем нужно
     {
         while(nSize < needspace) nSize*= 2; // Увеличиваем размер
         // Если превышен лимит, бросаем исключение
@@ -203,55 +203,75 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, iterator firs
         T* pOldStash = pStash;  // Сохраняем указатель
         pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
         T *newStashSlider(pStash), *oldStashSlider(pOldStash);
-        for( ; oldStashSlider < pos; ++newStashSlider, ++oldStashSlider)
+        for( ; oldStashSlider < pos; ++newStashSlider, ++oldStashSlider)// Копировать в новый контейнер все элементы от нуля до позиции вставки
         {
             new(newStashSlider) T(*oldStashSlider);
         }
 
-        retv = newStashSlider;
-        for(T *source(first); source < last; ++source, ++newStashSlider)
-        new(newStashSlider) T(*source);
+        retv = newStashSlider;  // Сохранить указатель на начало вставки для возврата
 
+        // Копируем из источника элементы в диапазоне [first, last)
+        for(T *source(first); source < last; ++source, ++newStashSlider)
+            new(newStashSlider) T(*source);
+
+        // Переносим в конец вектора все оставшиеся элементы
         for(T *bound(pOldStash + nCounter); oldStashSlider < bound; ++newStashSlider, ++oldStashSlider)
         {
             new(newStashSlider) T(*oldStashSlider);
         }
 
+        // Удалить все перемещенные элементы
         for(T *bound(pOldStash + nCounter), *tmp = pOldStash; tmp < bound; ++tmp)
         {
             tmp->~T();
         }
-        ::operator delete(pOldStash);   // Освобождаем память, которая была занята только что скопированным контейнером
+        // Освобождаем память, которая была занята только что скопированным контейнером
+        ::operator delete(pOldStash);
     }
     else// если место в контейнере ещё есть
     {
+        // Перемещаем "отрезок" [pos, back()] на chunksize элементов
         T *target(&back() + chunksize), *source(&back());
         for(; source >= pos; --target, --source)
         {
             *target = *source;
         }
 
+        // Копируем [first, last) в образовавшееся пространство
         for(const T *chunkSlider(last - 1); chunkSlider >= first; --target, --chunkSlider)
             new(target) T(*chunkSlider);
-        retv = target;
+
+        retv = target;  // Сохраняем указатель на вставку для возврата
     }
-    nCounter += chunksize;
-    return retv;
+
+    nCounter += chunksize;  // Увеличиваем счетчик элементов
+    return retv;    // Выход
 }
 
 //erase(first, last)
 template<class T>
 typename vector<T>::iterator vector<T>::erase(iterator first, const_iterator last)
 {
+    // Для вектора {0,1,2,3,4(first),5,6,7(last),8,9,10}
+
+    // Удаляем элементы [first, last) (т.е. 4,5,6)
     for(T *tmp(first); tmp < last; ++tmp)
     {
         tmp->~T();
     }
+    // Получаем {0,1,2,3,X,X,X,7(first),8,9,10(last)}
+
+    // Присоединяем "хвост"( 7(first), 8, 9, 10(last), bound )
     for(T *recv(first), *source(const_cast<T*>(last)), *bound(end()); source < bound; ++recv, ++source)
     {
         *recv = *source;
     }
+    // Получаем {0,1,2,3,7,8,9,10}
+
+    // Вычисляем количество элементов
     nCounter -= last-first;
+
+    // Выход
     return nullptr;
 }
 
