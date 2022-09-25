@@ -14,7 +14,7 @@ class vector
 {
     
     const unsigned long long int MAX_SIZE; // Максимально допустимый размер вектора в элементах
-    const std::size_t TYPE_SIZE;// Размер типа, только для того чтобы не вызывать каждый раз sizeof...
+    const std::size_t TYPE_SIZE;// Размер типа хранимых объектов, только для того чтобы не вызывать каждый раз sizeof...
 
     std::size_t nCounter;  // Количество объектов в контейнере
     std::size_t nSize;   // Размер контейнера в элементах(объём памяти, выделенной под хранение элементов)
@@ -40,7 +40,8 @@ class vector
 
     reference operator[](const size_type);
     vector<value_type>& operator=(const vector<value_type>&);
-    // ==,!=, <=, >=... ?
+    bool operator==(const vector<value_type>&);
+    bool operator!=(const vector<value_type>&);
 
     // -------------------------------------Методы------------------------------
 

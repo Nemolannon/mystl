@@ -316,8 +316,8 @@ void vector<T>::reserve(size_t n)
     // кажется ошибочным, так как в этом случае для каждого
     // созданного элемента T автоматически будет вызван не нужный(а иногда и недоступный) в данном случае конструктор по умолчанию;
     // более верным кажется выделение из кучи неотформатированной области нужного размера,
-    // её принудительное "форматирование"(static_cast<>) и последующее размещение в эой облати
-    // копий существующих объектов при помощи оператора placement new.
+    // её принудительное "форматирование"(static_cast<>) и последующее размещение в этой облати
+    // копий перемещаемых объектов при помощи оператора placement new.
     for(T *target(pStash), *source(pOldStash), *bound(pOldStash + copyes); source < bound; ++target, ++source)
     {
         new(target) T(*source);
@@ -353,6 +353,37 @@ void vector<T>::resize(size_type new_size, const_reference val)
     {
         new(tmp) T(val);
     }
+}
+
+//-------------------------------------------Операторы-------------------------------------------
+
+// operator=
+template<class T>
+typename vector<T>& vector<T>::operator=(const vector<T>& source)
+{
+    clear();
+    reserve(source.capacity());
+    insert(begin(), source.begin(), source.end());
+    return *this;
+}
+
+// operator==
+template<class T>
+bool vector<T>::operator==(const vector<T>& vright)
+{
+    if(/*nSize != right.nSize || */nCounter != vright.nCounter) return false;
+    for(T *left(pStash), *right(vright.pStash), *bound = vright.end(); right < bound; ++left, ++right)
+    {
+        if(*left != *right) return false;
+    }
+    return true;
+}
+
+// operator!=
+template<class T>
+bool vector<T>::operator!=(const vector<T>& vright)
+{
+    return !(*this == vright);
 }
 
 };
