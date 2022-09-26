@@ -1,27 +1,45 @@
+#define BOOST_TEST_MODULE fixture_03
 #include <boost/test/included/unit_test.hpp>
-#include <boost/bind/bind.hpp>
-using namespace boost::unit_test;
+#include <boost/test/data/test_case.hpp>
+#include <boost/test/data/monomorphic.hpp>
+#include "../vector/vector.cpp"
+namespace data = boost::unit_test::data;
+namespace utf = boost::unit_test;
 
-class test_class
-{
-public:
-  void test_method1()
+/* 1. Вектор хранит данные в виде массива, то есть в линейном порядке. Следовательно, имея указатель
+  на первый элемент, можно получить доступ ко всем остальным точно так же, как это можно сделать с обычным массивом
+*/
+struct F {
+  const int size;
+  my::vector<int> vec;
+  int* arr;
+
+  F() : size(10), arr(new int(size))
   {
-    BOOST_TEST( true /* test assertion */ );
+    BOOST_TEST_MESSAGE("Ctor F");
+    vec.reserve(10);
+    for(int f=0; f < 10; ++f)
+    {
+      arr[f] = f;
+      vec.push_back(f);
+    }
   }
-  void test_method2()
-  {
-    BOOST_TEST( false /* test assertion */ );
-  }
+  ~F() { delete arr; }
 };
 
-test_suite* init_unit_test_suite( int /*argc*/, char* /*argv*/[] )
-{
-  boost::shared_ptr<test_class> tester( new test_class );
+BOOST_AUTO_TEST_SUITE(s, * utf::fixture<F>())
 
-  framework::master_test_suite().
-    add( BOOST_TEST_CASE( boost::bind( &test_class::test_method1, tester )));
-  framework::master_test_suite().
-    add( BOOST_TEST_CASE( boost::bind( &test_class::test_method2, tester )));
-  return 0;
-}
+  BOOST_DATA_TEST_CASE(Linearity_test, data::make({0,1,2,3,4,5,6,7,8,9}), val)
+  {
+    //int* vecarray = vec.begin();
+    BOOST_TEST(true);//vecarray[val] == arr[val]);
+  }
+
+
+  BOOST_AUTO_TEST_CASE(test_case2)
+  {
+    BOOST_TEST_MESSAGE("running test_case2");
+    BOOST_TEST(true);
+  }
+
+BOOST_AUTO_TEST_SUITE_END()

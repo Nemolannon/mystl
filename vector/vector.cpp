@@ -359,7 +359,7 @@ void vector<T>::resize(size_type new_size, const_reference val)
 
 // operator=
 template<class T>
-typename vector<T>& vector<T>::operator=(const vector<T>& source)
+vector<T>& vector<T>::operator=(const vector<T>& source)
 {
     clear();
     reserve(source.capacity());
