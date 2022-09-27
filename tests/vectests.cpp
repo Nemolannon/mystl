@@ -7,30 +7,30 @@ namespace data = boost::unit_test::data;
 namespace utf = boost::unit_test;
 
 struct F {
-  const int size;
+  static const int SIZE;
   my::vector<int> vec;  // Тестируемый вектор
-  int *prototype; // Идентичный тестируемому вектору массив
 
-  F() : size(10), prototype(new int(size))
+  F()
   {
-    vec.reserve(size);
-    for(int f=0; f < size; ++f)
+    vec.reserve(SIZE);
+    for(int f=0; f < SIZE; ++f)
     {
-      prototype[f] = f;
       vec.push_back(f);
     }
   }
-  ~F() { delete[] prototype; }
+  ~F() {}
 };
+
+const int F::SIZE = 10;
 
 /* 1. Вектор хранит данные в виде массива, то есть в линейном порядке. Следовательно, имея указатель
   на первый элемент, можно получить доступ ко всем остальным точно так же, как это можно сделать с обычным массивом
 */
 
-  BOOST_DATA_TEST_CASE_F(F, linearity_test, data::make({0,1,2,3,4,5,6,7,8,9}), val)
+  BOOST_DATA_TEST_CASE_F(F, linearity_test, data::xrange(F::SIZE), val)
   {
     int* test_array = vec.begin();  // Получаем указатель на первый элемент
-    BOOST_TEST(test_array[val] == prototype[val]);  // Проверяем, как работает "индексация"
+    BOOST_TEST(test_array[val] == val);  // Проверяем, как работает "индексация"
   }
 
 /* 2.1 Метод capacity() возвращает объём памяти, зарезервированной под хранение элементов(будет проверено далее);
@@ -117,6 +117,7 @@ struct F1
     {
       delete pcToken;
       pbReleased[n] = true;
+      BOOST_TEST_MESSAGE("~Obj()");
     }
   };
 
@@ -124,6 +125,7 @@ struct F1
   
   F1() : prototypeN(new int[SIZE]), prototypeToken(new char[SIZE])
   {
+    vec.reserve(SIZE);
     for(int i(0); i < SIZE; ++i)
     {
       prototypeN[i] = i;
@@ -136,8 +138,11 @@ struct F1
   {
     delete[] prototypeN;
     delete[] prototypeToken;
+    BOOST_TEST_MESSAGE("~F1()");
   }
 };
+
+bool F1::Obj::pbReleased[SIZE] = {0};
 
 BOOST_DATA_TEST_CASE_F(F1, test_3_3_reserve_data_integrity, data::make({11, 16, 20, 200, 1200}), new_size)
 {
@@ -146,9 +151,9 @@ BOOST_DATA_TEST_CASE_F(F1, test_3_3_reserve_data_integrity, data::make({11, 16, 
     Obj* pObj = vec.begin();
     for(int i(0); i < vec.size(); ++i)
     {
-      BOOST_TEST(prototypeN[i] == pObj[i].n);
-      BOOST_TEST(prototypeN[i] == *(pObj[i].pN));
-      BOOST_TEST(prototypeToken[i] == *(pObj[i].pcToken));
+      BOOST_TEST(prototypeN[i] == vec[i].n);
+      BOOST_TEST(prototypeN[i] == *(vec[i].pN));
+      BOOST_TEST(prototypeToken[i] == *(vec[i].pcToken));
     }
     if(repeat) vec.reserve(new_size);
       else break;
@@ -161,12 +166,12 @@ BOOST_DATA_TEST_CASE_F(F1, test_3_3_reserve_data_integrity, data::make({11, 16, 
 
 BOOST_DATA_TEST_CASE_F(F1, test_3_4_reserve_memory_freeing_up, data::make({9,8,7,6,5,4,3,2,1,0}), new_size)
 {
-  Obj* pObj = vec.begin();
+  //Obj* pObj = vec.begin();
   for(int i(0); i < vec.size(); ++i)
   {
-    BOOST_TEST(prototypeN[i] == pObj[i].n);
-    BOOST_TEST(prototypeN[i] == *(pObj[i].pN));
-    BOOST_TEST(prototypeToken[i] == *(pObj[i].pcToken));
+    BOOST_TEST(prototypeN[i] == vec[i].n);
+    BOOST_TEST(prototypeN[i] == *(vec[i].pN));
+    BOOST_TEST(prototypeToken[i] == *(vec[i].pcToken));
     BOOST_TEST(!Obj::pbReleased[i]);
   }
 
@@ -175,9 +180,9 @@ BOOST_DATA_TEST_CASE_F(F1, test_3_4_reserve_memory_freeing_up, data::make({9,8,7
 
   for(int i(0); i < vec.size(); ++i)
   {
-    BOOST_TEST(prototypeN[i] == pObj[i].n);
-    BOOST_TEST(prototypeN[i] == *(pObj[i].pN));
-    BOOST_TEST(prototypeToken[i] == *(pObj[i].pcToken));
+    BOOST_TEST(prototypeN[i] == vec[i].n);
+    BOOST_TEST(prototypeN[i] == *(vec[i].pN));
+    BOOST_TEST(prototypeToken[i] == *(vec[i].pcToken));
   }
 
   for(int i(new_size); i < SIZE; ++i)
