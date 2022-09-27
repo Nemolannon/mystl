@@ -92,12 +92,11 @@ BOOST_AUTO_TEST_CASE(test_3_2_reserve_length_error)
 struct F1
 {
 
-  const int SIZE;
-  const char CODE;
+  static const int SIZE = 10;
+  static const char CODE = 'a';
 
   int *prototypeN;
   char *prototypeToken;
-  static bool *pbReleased; // Чтобы отследить вызов деструктора
   
   class Obj
   {
@@ -105,26 +104,30 @@ struct F1
     int n;
     int *pN;  // Указатель на поле n делает объекты класса Obj нерелоцируемыми
     char *pcToken;  // Указывает на символ, под который выделена память из кучи
-    static bool *pRel;
+    static bool pbReleased[SIZE]; // Чтобы отследить вызов деструктора
 
-    Obj(int nn, const char tok, bool *) : n(nn), pN(&n), pcToken(new char(tok)) {}
+    Obj(const int nn, const char tok) : n(nn), pN(&n), pcToken(new char(tok))
+    {
+      pbReleased[n] = false;
+    }
+
     Obj(const Obj& obj) : n(obj.n), pN(&n), pcToken(new char(*(obj.pcToken))) {}
+    
     ~Obj()
     {
       delete pcToken;
-      pRel[n] = true;
+      pbReleased[n] = true;
     }
   };
 
   my::vector<Obj>vec;
   
-  F1() : SIZE(10), CODE(92), prototypeN(new int[SIZE]), prototypeToken(new char[SIZE])
+  F1() : prototypeN(new int[SIZE]), prototypeToken(new char[SIZE])
   {
     for(int i(0); i < SIZE; ++i)
     {
       prototypeN[i] = i;
       prototypeToken[i] = CODE+i;
-      pbReleased[i] = false;
       vec.push_back(Obj(i,static_cast<char>(CODE+i),));
     }
   }
@@ -132,7 +135,6 @@ struct F1
   {
     delete[] prototypeN;
     delete[] prototypeToken;
-    delete[] pbReleased;
   }
 };
 
