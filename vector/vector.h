@@ -57,10 +57,10 @@ class vector
     reference back() { return nCounter == 0 ? *pStash : *(pStash+nCounter-1);}   // Возвращает ссылку на последний элемент
 
     // Итераторы
-    iterator begin() { return pStash; };
-    const_iterator cbegin() const { return const_cast<const_iterator>(pStash); };
-    iterator end() { return pStash + nCounter; };
-    const_iterator cend() const { return const_cast<const_iterator>(pStash + nCounter); };
+    iterator begin() { return pStash; }
+    const_iterator cbegin() const { return const_cast<const_iterator>(pStash); }
+    iterator end() { return pStash + nCounter; }
+    const_iterator cend() const { return const_cast<const_iterator>(pStash + nCounter); }
 
     // Объем, размер, вместимость
     bool empty() const{ return nCounter == 0; }

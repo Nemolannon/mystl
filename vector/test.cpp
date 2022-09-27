@@ -23,17 +23,21 @@ int Obj::counter = 0;
 
 int main()
 {
-    my::vector<Obj> vobj(128);
-    vobj.push_back(Obj());
-    my::vector<Obj> vvobj(10);
-    std::cout << "Out content:" << std::endl;
-    for(Obj &obj : vobj)
-        std::cout << *(obj.pN) << std::endl;
-    std::cout << "Inserting:" << std::endl;
-    vobj.insert(vobj.begin()+100,Obj());
-    std::cout << "Out content:" << std::endl;
-    for(Obj &obj : vobj)
-        std::cout << obj.n << " " << *(obj.pN) << std::endl;
-    std::cout << "Size of vector " << vobj.size() << std::endl;
-    std::cout << "Exit programm" << std::endl;
+    my::vector<int>vec;
+    vec.push_back(0);
+    vec.push_back(0);
+    vec.push_back(0);
+    vec.push_back(0);
+    vec.push_back(0);
+    vec.push_back(0);
+    vec.push_back(0);
+    vec.push_back(0);
+    vec.push_back(0);
+    vec.push_back(0);
+    vec.push_back(0);
+    int *p = vec.begin();
+    for(int i(0); i < vec.size(); ++i)
+    {
+        std::cout << p[i] << std::endl;
+    }
 }
