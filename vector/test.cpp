@@ -2,42 +2,62 @@
 #include <vector>
 #include "vector.cpp"
 
-const int QUANTITY = 100;
 
-class Obj
+struct F1
 {
+
+  static const int SIZE = 10;
+  static const char CODE = 'a';
+
+  int *prototypeN;
+  char *prototypeToken;
+  
+  class Obj
+  {
     public:
-    //static int copy_counter;
-    static int counter;
     int n;
-    int*pN;
-    Obj() : n(counter++), pN(&n) {}
-    Obj(const Obj& obj) : n(obj.n), pN(&n) {std::cout << n << " copy constructor called" << std::endl;}
-    ~Obj(){
-        //delete pN;
-        std::cout << n << " destructor called" << std::endl;}
+    int *pN;  // Указатель на поле n делает объекты класса Obj нерелоцируемыми
+    char *pcToken;  // Указывает на символ, под который выделена память из кучи
+    static bool pbReleased[SIZE]; // Чтобы отследить вызов деструктора
+
+    Obj(const int nn, const char tok) : n(nn), pN(&n), pcToken(new char(tok))
+    {
+      pbReleased[n] = false;
+    }
+
+    Obj(const Obj& obj) : n(obj.n), pN(&n), pcToken(new char(*(obj.pcToken))) {}
+    
+    ~Obj()
+    {
+      delete pcToken;
+      pbReleased[n] = true;
+    }
+  };
+
+  my::vector<Obj>vec;
+  
+  F1() : prototypeN(new int[SIZE]), prototypeToken(new char[SIZE])
+  {
+    for(int i(0); i < SIZE; ++i)
+    {
+      prototypeN[i] = i;
+      prototypeToken[i] = CODE+i;
+      vec.push_back(Obj(i,static_cast<char>(CODE+i)));
+    }
+  }
+  
+  ~F1()
+  {
+    delete[] prototypeN;
+    delete[] prototypeToken;
+  }
 };
 
-//int Obj::copy_counter = 0;
-int Obj::counter = 0;
+
+  bool F1::Obj::pbReleased[SIZE] = {0};
+
 
 int main()
 {
-    my::vector<int>vec;
-    vec.push_back(0);
-    vec.push_back(0);
-    vec.push_back(0);
-    vec.push_back(0);
-    vec.push_back(0);
-    vec.push_back(0);
-    vec.push_back(0);
-    vec.push_back(0);
-    vec.push_back(0);
-    vec.push_back(0);
-    vec.push_back(0);
-    int *p = vec.begin();
-    for(int i(0); i < vec.size(); ++i)
-    {
-        std::cout << p[i] << std::endl;
-    }
+    F1 f1;
 }

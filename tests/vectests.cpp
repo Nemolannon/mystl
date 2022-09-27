@@ -128,9 +128,10 @@ struct F1
     {
       prototypeN[i] = i;
       prototypeToken[i] = CODE+i;
-      vec.push_back(Obj(i,static_cast<char>(CODE+i),));
+      vec.push_back(Obj(i,static_cast<char>(CODE+i)));
     }
   }
+  
   ~F1()
   {
     delete[] prototypeN;
@@ -166,7 +167,7 @@ BOOST_DATA_TEST_CASE_F(F1, test_3_4_reserve_memory_freeing_up, data::make({9,8,7
     BOOST_TEST(prototypeN[i] == pObj[i].n);
     BOOST_TEST(prototypeN[i] == *(pObj[i].pN));
     BOOST_TEST(prototypeToken[i] == *(pObj[i].pcToken));
-    BOOST_TEST(!pbReleased[i]);
+    BOOST_TEST(!Obj::pbReleased[i]);
   }
 
   vec.reserve(new_size);
@@ -181,6 +182,6 @@ BOOST_DATA_TEST_CASE_F(F1, test_3_4_reserve_memory_freeing_up, data::make({9,8,7
 
   for(int i(new_size); i < SIZE; ++i)
   {
-    BOOST_TEST(pbReleased[i]);
+    BOOST_TEST(Obj::pbReleased[i]);
   }
 }
