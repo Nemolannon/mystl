@@ -7,6 +7,8 @@
 #define MY_VECTOR_MAX_SIZE 1048576 //
 #endif
 
+#include <cstddef>
+
 namespace my{
 
 template<class T> 

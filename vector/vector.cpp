@@ -1,4 +1,5 @@
 #include "vector.h"
+using namespace std;
 
 namespace my
 {
@@ -15,7 +16,7 @@ template<class T>
 vector<T>::vector(int n) : MAX_SIZE(MY_VECTOR_MAX_SIZE), TYPE_SIZE(sizeof(T)),
     nCounter(0), nSize(n)
 {
-    if(nSize > MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
+    if(nSize > MAX_SIZE) throw length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + to_string(MAX_SIZE) + ", " + to_string(nSize) + " requested");
     pStash = static_cast<T*>(::operator new(nSize*TYPE_SIZE));
     for(T *tmp(pStash); nCounter < n; ++nCounter, ++tmp)
         new(tmp) T(T());
@@ -49,7 +50,7 @@ template<class T>
 typename vector<T>::reference vector<T>::at(const size_t n)
 {
     if(n < nSize) return pStash[n];
-    throw std::out_of_range("Out of range in my::vector::at(), nSize = " + std::to_string(nSize) + "; n = " + std::to_string(n));
+    throw out_of_range("Out of range in my::vector::at(), nSize = " + to_string(nSize) + "; n = " + to_string(n));
 }
 
 //operator[]
@@ -114,7 +115,7 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, const_referen
     {
         nSize *= 2; // Увеличиваем размер
         // Если превышен лимит, бросаем исключение
-        if(nSize > MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
+        if(nSize > MAX_SIZE) throw length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + to_string(MAX_SIZE) + ", " + to_string(nSize) + " requested");
         T* pOldStash = pStash;  // Сохраняем указатель
         pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
         T *target(pStash), *source(pOldStash);
@@ -161,7 +162,7 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, size_type cou
     {
         while(nCounter < nSize - count) nSize *= 2; // Увеличиваем размер
         // Если превышен лимит, бросаем исключение
-        if(nSize > MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
+        if(nSize > MAX_SIZE) throw length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + to_string(MAX_SIZE) + ", " + to_string(nSize) + " requested");
         T* pOldStash = pStash;  // Сохраняем указатель
         pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
         T *target(pStash), *source(pOldStash);
@@ -199,7 +200,7 @@ typename vector<T>::iterator vector<T>::insert(const_iterator pos, iterator firs
     {
         while(nSize < needspace) nSize*= 2; // Увеличиваем размер
         // Если превышен лимит, бросаем исключение
-        if(nSize > MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
+        if(nSize > MAX_SIZE) throw length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + to_string(MAX_SIZE) + ", " + to_string(nSize) + " requested");
         T* pOldStash = pStash;  // Сохраняем указатель
         pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
         T *newStashSlider(pStash), *oldStashSlider(pOldStash);
@@ -307,7 +308,7 @@ void vector<T>::reserve(size_t n)
 {
     nSize = n; // Пробуем изменить размер
     // Если нарушен лимит, бросаем исключение
-    if(nSize > MAX_SIZE) throw std::length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + std::to_string(MAX_SIZE) + ", " + std::to_string(nSize) + " requested");
+    if(nSize > MAX_SIZE) throw length_error("Exceeded the maximum size of the vector. MAX_SIZE is " + to_string(MAX_SIZE) + ", " + to_string(nSize) + " requested");
     size_t copyes = (n > nCounter) ? nCounter : n;  // Вычисляем, сколько элементов нужно перенести в новый контейнер
     T* pOldStash = pStash;  // Сохраняем указатель
     pStash = static_cast<T*>(::operator new(nSize * TYPE_SIZE));// Выделяем память под контейнер нового размера
