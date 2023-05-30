@@ -8,11 +8,37 @@ class list
     struct Node
     {
         T value;
-        Node *pNext;
-        Node *pPrev;
+        Node* pNext;
+        Node* pPrev;
     };
+
+    Node* pHead;
     
     public:
+
+    class iterator
+    {
+        Node* current;
+
+        public:
+
+        T operator*(iterator it)
+        {
+            return current->value;
+        }
+
+        iterator& operator++(iterator& it)
+        {
+            if(it.current) it.current = it.current->pNext;
+            return it;
+        }
+        
+        iterator& operator--(iterator& it)
+        {
+            if(it.current) it.current = it.current->pPrev;
+            return it;
+        }
+    };
 
     using value_type        = T;
     using size_type         = std::size_t;
