@@ -46,7 +46,7 @@ class list
     using const_reference   = const value_type&
     using pointer           = value_type*;
     using const_pointer 	= const T*;
-    using iterator          = T*;
+
     using const_iterator    = const iterator;
     //using reverse_iterator;
     //using const_reverse_iterator;
